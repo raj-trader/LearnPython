@@ -3,7 +3,9 @@ import numpy as np
 import streamlit as st
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
-import sqlite3
+__import__('pysqlite3')
+import sys
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')   
 
 # Mobile-optimized page configuration
 st.set_page_config(
