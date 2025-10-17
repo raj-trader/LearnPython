@@ -331,7 +331,6 @@ def main():
     selected_date = date_options[selected_date_str]
     if selected_date != st.session_state.selected_date:
         st.session_state.selected_date = selected_date
-        st.rerun()
 
     # Load data
     nifty_data = load_nifty_data_from_db(st.session_state.selected_date, DB_FILE_PATH)
@@ -394,24 +393,24 @@ def main():
 
     # Simple navigation
     st.markdown("---")
-    
+
     chronological_dates = sorted(available_dates)
     current_index = chronological_dates.index(st.session_state.selected_date)
-    
+
     col1, col2 = st.columns(2)
     with col1:
         if current_index > 0:
-            if st.button("◀ Previous Day", use_container_width=True):
-                st.session_state.selected_date = chronological_dates[current_index - 1]
-                st.rerun()
+            if st.button("◀ Previous Day", use_container_width=True, 
+                        on_click=lambda: st.session_state.update(selected_date=chronological_dates[current_index - 1])):
+                pass
         else:
             st.button("◀ Previous Day", disabled=True, use_container_width=True)
-    
+
     with col2:
         if current_index < len(chronological_dates) - 1:
-            if st.button("Next Day ▶", use_container_width=True):
-                st.session_state.selected_date = chronological_dates[current_index + 1]
-                st.rerun()
+            if st.button("Next Day ▶", use_container_width=True,
+                        on_click=lambda: st.session_state.update(selected_date=chronological_dates[current_index + 1])):
+                pass
         else:
             st.button("Next Day ▶", disabled=True, use_container_width=True)
 
