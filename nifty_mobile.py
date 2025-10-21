@@ -138,9 +138,9 @@ def identify_call_put_options(options_data):
     
     return call_options, put_options
 
-# EXACT SAME CHART FUNCTION AS DESKTOP VERSION (just with mobile height)
+# UPDATED CHART FUNCTION WITHOUT VWAP INDICATORS
 def create_tradingview_chart(data, title, show_levels=True, risk_value=None, height=500):
-    """Create a TradingView-style chart without volume but with VWAP indicators"""
+    """Create a TradingView-style chart without VWAP indicators"""
     # Light theme colors
     bg_color = "white"
     grid_color = "#E5ECF6"
@@ -166,41 +166,6 @@ def create_tradingview_chart(data, title, show_levels=True, risk_value=None, hei
 
     fig.add_trace(candlestick)
 
-    # Calculate VWAP with low as source
-    if 'volume' in data.columns and 'low' in data.columns:
-        # VWAP with low as source
-        data['typical_price_low'] = (data['low'] + data['low'] + data['close']) / 3  # Using low twice to emphasize low
-        data['cumulative_typical_volume_low'] = (data['typical_price_low'] * data['volume']).cumsum()
-        data['cumulative_volume'] = data['volume'].cumsum()
-        data['vwap_low'] = data['cumulative_typical_volume_low'] / data['cumulative_volume']
-
-        # Add VWAP low line
-        vwap_low_line = go.Scatter(
-            x=data['datetime'],
-            y=data['vwap_low'],
-            name='VWAP (Low Source)',
-            line=dict(color='#FF6B9D', width=1),
-            opacity=0.8
-        )
-        fig.add_trace(vwap_low_line)
-
-    # Calculate VWAP with high as source
-    if 'volume' in data.columns and 'high' in data.columns:
-        # VWAP with high as source
-        data['typical_price_high'] = (data['high'] + data['high'] + data['close']) / 3  # Using high twice to emphasize high
-        data['cumulative_typical_volume_high'] = (data['typical_price_high'] * data['volume']).cumsum()
-        data['vwap_high'] = data['cumulative_typical_volume_high'] / data['cumulative_volume']
-
-        # Add VWAP high line
-        vwap_high_line = go.Scatter(
-            x=data['datetime'],
-            y=data['vwap_high'],
-            name='VWAP (High Source)',
-            line=dict(color='#4ECDC4', width=1),
-            opacity=0.8
-        )
-        fig.add_trace(vwap_high_line)
-
     # Set the x-axis range to start at 9:15 and end at 15:30
     start_time = pd.Timestamp(data['datetime'].iloc[0].date()).replace(hour=9, minute=15, second=0)
     end_time = pd.Timestamp(data['datetime'].iloc[0].date()).replace(hour=15, minute=30, second=0)
@@ -208,14 +173,6 @@ def create_tradingview_chart(data, title, show_levels=True, risk_value=None, hei
     # Calculate y-axis range
     price_min = data['low'].min()
     price_max = data['high'].max()
-
-    # Include VWAP values in y-axis range calculation if they exist
-    if 'vwap_low' in data.columns:
-        price_min = min(price_min, data['vwap_low'].min())
-        price_max = max(price_max, data['vwap_low'].max())
-    if 'vwap_high' in data.columns:
-        price_min = min(price_min, data['vwap_high'].min())
-        price_max = max(price_max, data['vwap_high'].max())
 
     padding = (price_max - price_min) * 0.05
     y_range = [price_min - padding, price_max + padding]
@@ -310,15 +267,12 @@ def main():
         st.session_state.selected_date = available_dates[0]
 
     # Date selection - mobile optimized
-    #st.subheader("📅 Select Date")
-    
     date_options = {date.strftime("%Y-%m-%d"): date for date in available_dates}
     current_date_str = st.session_state.selected_date.strftime("%Y-%m-%d")
     
     col_label, col_dropdown = st.columns([1, 10])
     with col_label:
         st.subheader("📅 Select Date")
-        #st.markdown("**Select Date:**")
     with col_dropdown:
         selected_date_str = st.selectbox(
                 ":",
