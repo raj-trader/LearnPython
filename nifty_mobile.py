@@ -1,6 +1,6 @@
-__import__('pysqlite3')
-import sys
-sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')   
+#__import__('pysqlite3')
+#import sys
+#sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')   
 import sqlite3
 import pandas as pd
 import numpy as np
@@ -32,11 +32,6 @@ st.markdown("""
     .stTab label {
         padding: 12px 8px;
         font-size: 14px;
-    }
-    
-    /* Better chart interaction */
-    .js-plotly-plot .plotly .modebar {
-        display: none !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -138,9 +133,9 @@ def identify_call_put_options(options_data):
     
     return call_options, put_options
 
-# UPDATED CHART FUNCTION WITHOUT VWAP INDICATORS
+# UPDATED CHART FUNCTION WITH ZOOM AND SCROLL
 def create_tradingview_chart(data, title, show_levels=True, risk_value=None, height=500):
-    """Create a TradingView-style chart without VWAP indicators"""
+    """Create a TradingView-style chart with zoom and scroll functionality"""
     # Light theme colors
     bg_color = "white"
     grid_color = "#E5ECF6"
@@ -181,7 +176,7 @@ def create_tradingview_chart(data, title, show_levels=True, risk_value=None, hei
     if risk_value is not None:
         title = f"{title} (Risk: {risk_value})"
 
-    # Update layout for TradingView style
+    # Update layout for TradingView style with zoom and scroll enabled
     layout_updates = dict(
         title=title,
         xaxis_title=None,
@@ -196,14 +191,21 @@ def create_tradingview_chart(data, title, show_levels=True, risk_value=None, hei
             gridwidth=1,
             gridcolor=grid_color,
             rangeslider=dict(visible=False),
-            range=[start_time, end_time]
+            range=[start_time, end_time],
+            # Enable zoom and scroll
+            rangeslider_visible=False,
+            type="date",
+            # Allow zooming and panning
+            fixedrange=False
         ),
         yaxis=dict(
             showgrid=False,
             gridwidth=1,
             gridcolor=grid_color,
             type="linear",
-            range=y_range
+            range=y_range,
+            # Allow zooming and panning
+            fixedrange=False
         ),
         margin=dict(l=50, r=50, t=50, b=50),
         legend=dict(
@@ -213,6 +215,7 @@ def create_tradingview_chart(data, title, show_levels=True, risk_value=None, hei
             xanchor="right",
             x=1
         ),
+        # Enable drag/pan mode
         dragmode="pan"
     )
 
@@ -299,11 +302,18 @@ def main():
     # Mobile-optimized tabs
     tab1, tab2, tab3 = st.tabs(["📊 Nifty", "📈 Calls", "📉 Puts"])
     
+    # Chart configuration with zoom and scroll enabled
+    chart_config = {
+        'scrollZoom': True,  # Enable scroll to zoom
+        'displayModeBar': True,
+        'modeBarButtonsToAdd': ['zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d'],
+        'displaylogo': False,
+    }
+    
     with tab1:
         if nifty_data is not None:
             fig = create_tradingview_chart(nifty_data, "Nifty 50", True, risk_value, height=500)
-            st.plotly_chart(fig, use_container_width=True, 
-                           config={'modeBarButtonsToRemove': ['zoom', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'select2d', 'lasso2d'], 'displaylogo': False})
+            st.plotly_chart(fig, use_container_width=True, config=chart_config)
         else:
             st.warning("No Nifty data available")
     
@@ -318,8 +328,7 @@ def main():
                         option_risk = int(option_data['diff'].iloc[0])
                     
                     fig = create_tradingview_chart(option_data, option_name, True, option_risk, height=450)
-                    st.plotly_chart(fig, use_container_width=True, 
-                                  config={'modeBarButtonsToRemove': ['zoom', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'select2d', 'lasso2d'], 'displaylogo': False})
+                    st.plotly_chart(fig, use_container_width=True, config=chart_config)
                     st.markdown("---")  # Separator between charts
             else:
                 st.info("No call options available")
@@ -337,8 +346,7 @@ def main():
                         option_risk = int(option_data['diff'].iloc[0])
                     
                     fig = create_tradingview_chart(option_data, option_name, True, option_risk, height=450)
-                    st.plotly_chart(fig, use_container_width=True, 
-                                  config={'modeBarButtonsToRemove': ['zoom', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'select2d', 'lasso2d'], 'displaylogo': False})
+                    st.plotly_chart(fig, use_container_width=True, config=chart_config)
                     st.markdown("---")  # Separator between charts
             else:
                 st.info("No put options available")
