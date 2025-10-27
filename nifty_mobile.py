@@ -1,6 +1,6 @@
-__import__('pysqlite3')
-import sys
-sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')   
+#__import__('pysqlite3')
+#import sys
+#sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')   
 import sqlite3
 import pandas as pd
 import numpy as np
@@ -312,7 +312,7 @@ def main():
     
     with tab1:
         if nifty_data is not None:
-            fig = create_tradingview_chart(nifty_data, "Nifty 50", True, risk_value, height=500)
+            fig = create_tradingview_chart(nifty_data, "Nifty 50", True, risk_value, height=650)
             st.plotly_chart(fig, use_container_width=True, config=chart_config)
         else:
             st.warning("No Nifty data available")
@@ -327,9 +327,9 @@ def main():
                     if 'diff' in option_data.columns and not pd.isna(option_data['diff'].iloc[0]):
                         option_risk = int(option_data['diff'].iloc[0])
                     
-                    fig = create_tradingview_chart(option_data, option_name, True, option_risk, height=450)
+                    fig = create_tradingview_chart(option_data, option_name, True, option_risk, height=650)
                     st.plotly_chart(fig, use_container_width=True, config=chart_config)
-                    st.markdown("---")  # Separator between charts
+                    #st.markdown("---")  # Separator between charts
             else:
                 st.info("No call options available")
         else:
@@ -345,16 +345,16 @@ def main():
                     if 'diff' in option_data.columns and not pd.isna(option_data['diff'].iloc[0]):
                         option_risk = int(option_data['diff'].iloc[0])
                     
-                    fig = create_tradingview_chart(option_data, option_name, True, option_risk, height=450)
+                    fig = create_tradingview_chart(option_data, option_name, True, option_risk, height=650)
                     st.plotly_chart(fig, use_container_width=True, config=chart_config)
-                    st.markdown("---")  # Separator between charts
+                    #st.markdown("---")  # Separator between charts
             else:
                 st.info("No put options available")
         else:
             st.info("No options data available")
 
     # Simple navigation
-    st.markdown("---")
+    #st.markdown("---")
 
     chronological_dates = sorted(available_dates)
     current_index = chronological_dates.index(st.session_state.selected_date)
